@@ -1,0 +1,394 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>com.hit.fp — Functional Data Processing Pipeline</title>
+<style>
+  :root{
+    --bg: #0f1115;
+    --surface: #171a21;
+    --surface-2: #1e222b;
+    --line: #2a2f3a;
+    --text: #e8eaed;
+    --muted: #8b92a0;
+    --pure: #6ee7b7;
+    --pure-dim: #6ee7b733;
+    --effect: #f5a623;
+    --effect-dim: #f5a62333;
+    --mixed: #7dd3fc;
+    --mono: 'IBM Plex Mono', 'SFMono-Regular', Consolas, monospace;
+    --sans: 'IBM Plex Sans', -apple-system, sans-serif;
+  }
+
+  @media (prefers-reduced-motion: reduce){
+    *{ animation: none !important; transition: none !important; }
+  }
+
+  *{ box-sizing: border-box; }
+
+  html{ scroll-behavior: smooth; }
+
+  body{
+    margin:0;
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--sans);
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  a{ color: var(--mixed); text-decoration: none; }
+  a:hover{ text-decoration: underline; }
+  a:focus-visible, button:focus-visible{ outline: 2px solid var(--mixed); outline-offset: 3px; }
+
+  .wrap{ max-width: 980px; margin: 0 auto; padding: 0 24px; }
+
+  code, pre, .mono{ font-family: var(--mono); }
+
+  /* ---------- Purity tag, the recurring signature ---------- */
+  .tag{
+    display:inline-flex; align-items:center; gap:6px;
+    font-family: var(--mono); font-size: 11px; letter-spacing: .06em;
+    text-transform: uppercase; padding: 3px 9px; border-radius: 20px;
+    border: 1px solid var(--line); color: var(--muted);
+    white-space: nowrap;
+  }
+  .tag .dot{ width:7px; height:7px; border-radius:50%; flex:none; }
+  .tag.pure{ color: var(--pure); border-color: var(--pure-dim); background: var(--pure-dim); }
+  .tag.pure .dot{ background: var(--pure); box-shadow: 0 0 8px var(--pure); }
+  .tag.effect{ color: var(--effect); border-color: var(--effect-dim); background: var(--effect-dim); }
+  .tag.effect .dot{ background: var(--effect); box-shadow: 0 0 8px var(--effect); }
+  .tag.mixed{ color: var(--mixed); border-color: #7dd3fc33; background: #7dd3fc22; }
+  .tag.mixed .dot{ background: var(--mixed); }
+
+  /* ---------- Header / Hero ---------- */
+  header{
+    border-bottom: 1px solid var(--line);
+    padding: 18px 0;
+    position: sticky; top:0; z-index: 10;
+    background: rgba(15,17,21,0.88);
+    backdrop-filter: blur(8px);
+  }
+  header .wrap{ display:flex; align-items:center; justify-content:space-between; gap: 16px; }
+  .brand{ font-family: var(--mono); font-size: 14px; color: var(--muted); }
+  .brand b{ color: var(--text); }
+  nav{ display:flex; gap: 20px; font-family: var(--mono); font-size: 13px; }
+  nav a{ color: var(--muted); }
+  nav a:hover{ color: var(--text); }
+
+  .hero{ padding: 96px 0 64px; border-bottom: 1px solid var(--line); }
+  .hero .eyebrow{
+    font-family: var(--mono); font-size: 12px; color: var(--muted);
+    letter-spacing: .08em; text-transform: uppercase; margin-bottom: 18px;
+  }
+  .hero h1{
+    font-family: var(--mono);
+    font-size: clamp(28px, 4.4vw, 46px);
+    line-height: 1.25;
+    margin: 0 0 20px;
+    font-weight: 600;
+    max-width: 15ch;
+  }
+  .hero h1 .p1{ color: var(--pure); }
+  .hero h1 .p2{ color: var(--effect); }
+  .hero p.lede{ color: var(--muted); font-size: 17px; max-width: 62ch; margin: 0 0 32px; }
+  .hero .stats{ display:flex; gap: 36px; flex-wrap: wrap; }
+  .stat b{ display:block; font-family: var(--mono); font-size: 24px; color: var(--text); }
+  .stat span{ font-size: 13px; color: var(--muted); }
+
+  .cta-row{ display:flex; gap: 14px; margin-top: 34px; flex-wrap: wrap; }
+  .btn{
+    font-family: var(--mono); font-size: 13px; padding: 11px 18px;
+    border-radius: 6px; border: 1px solid var(--line);
+  }
+  .btn.primary{ background: var(--pure); color: #06251b; border-color: var(--pure); font-weight: 600; }
+  .btn.primary:hover{ text-decoration:none; filter: brightness(1.08); }
+  .btn.ghost{ color: var(--text); }
+  .btn.ghost:hover{ text-decoration:none; border-color: var(--mixed); color: var(--mixed); }
+
+  /* ---------- Purity boundary divider — recurs between sections ---------- */
+  .boundary{
+    display:flex; align-items:center; gap: 14px;
+    margin: 0; padding: 10px 0;
+    font-family: var(--mono); font-size: 11px; color: var(--muted);
+    letter-spacing: .08em; text-transform: uppercase;
+  }
+  .boundary .side{ flex:1; height:1px; background: repeating-linear-gradient(90deg, var(--line) 0 6px, transparent 6px 11px); }
+
+  section{ padding: 56px 0; border-bottom: 1px solid var(--line); }
+  section.tight{ padding-top: 40px; }
+  h2{
+    font-family: var(--mono); font-size: 13px; text-transform: uppercase;
+    letter-spacing: .1em; color: var(--muted); margin: 0 0 8px;
+  }
+  h3{ font-size: 22px; margin: 0 0 20px; }
+  p.section-lede{ color: var(--muted); max-width: 68ch; margin: 0 0 28px; }
+
+  /* ---------- Architecture table ---------- */
+  .arch-table{ display:flex; flex-direction:column; gap: 10px; }
+  .arch-row{
+    display:grid; grid-template-columns: 200px 110px 1fr;
+    gap: 18px; align-items:center;
+    padding: 14px 16px; background: var(--surface);
+    border: 1px solid var(--line); border-radius: 8px;
+  }
+  .arch-row .pkg{ font-family: var(--mono); font-size: 14px; color: var(--text); }
+  .arch-row .desc{ color: var(--muted); font-size: 14px; }
+
+  /* ---------- Terminal block ---------- */
+  .terminal{
+    background: var(--surface); border: 1px solid var(--line);
+    border-radius: 10px; overflow: hidden; margin: 20px 0;
+  }
+  .terminal .bar{
+    display:flex; gap:6px; padding: 10px 14px; border-bottom: 1px solid var(--line);
+  }
+  .terminal .bar span{ width:9px; height:9px; border-radius:50%; background: var(--line); }
+  .terminal pre{
+    margin:0; padding: 18px 20px; font-size: 13.5px; color: var(--text);
+    overflow-x:auto;
+  }
+  .terminal .comment{ color: var(--muted); }
+  .terminal .cmd::before{ content: "$ "; color: var(--pure); }
+
+  /* ---------- Grid cards (findings, techniques) ---------- */
+  .grid{ display:grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 14px; }
+  .card{
+    background: var(--surface); border: 1px solid var(--line); border-radius: 10px;
+    padding: 20px; display:flex; flex-direction:column; gap: 10px;
+  }
+  .card h4{ margin:0; font-size: 15px; }
+  .card p{ margin:0; color: var(--muted); font-size: 13.5px; }
+  .card .where{ font-family: var(--mono); font-size: 12px; color: var(--mixed); }
+
+  /* ---------- Simple data table ---------- */
+  table.data{ width:100%; border-collapse: collapse; font-size: 14px; }
+  table.data th{
+    text-align:left; font-family: var(--mono); font-size: 11px; text-transform: uppercase;
+    letter-spacing: .05em; color: var(--muted); padding: 10px 14px; border-bottom: 1px solid var(--line);
+  }
+  table.data td{ padding: 12px 14px; border-bottom: 1px solid var(--line); color: var(--text); }
+  table.data td.mono{ color: var(--mixed); font-size: 13px; }
+  table.data tr:last-child td{ border-bottom:none; }
+  .table-wrap{ background: var(--surface); border: 1px solid var(--line); border-radius: 10px; overflow: hidden; }
+
+  /* ---------- Windows note ---------- */
+  .note{
+    display:flex; gap: 14px; background: var(--effect-dim); border: 1px solid var(--effect-dim);
+    border-left: 3px solid var(--effect); border-radius: 8px; padding: 16px 18px; margin-top: 22px;
+  }
+  .note b{ color: var(--effect); }
+  .note p{ margin: 4px 0 0; color: var(--muted); font-size: 14px; }
+
+  footer{ padding: 40px 0 60px; }
+  footer .wrap{ display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap: 14px; }
+  footer p{ color: var(--muted); font-size: 13px; margin:0; font-family: var(--mono); }
+
+  @media (max-width: 640px){
+    .arch-row{ grid-template-columns: 1fr; gap: 6px; }
+    .hero{ padding: 64px 0 48px; }
+    nav{ display:none; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="wrap">
+    <div class="brand">com.hit.fp <b>/ functional-programming</b></div>
+    <nav>
+      <a href="#architecture">Architecture</a>
+      <a href="#spark">Spark</a>
+      <a href="#techniques">Techniques</a>
+      <a href="#findings">Findings</a>
+      <a href="#run">Run it</a>
+    </nav>
+  </div>
+</header>
+
+<section class="hero">
+  <div class="wrap">
+    <div class="eyebrow">Final project — Functional Programming, HIT</div>
+    <h1>Push the effects to the edge.<br>Keep the <span class="p1">core</span> <span class="mono">pure</span>.</h1>
+    <p class="lede">
+      A complete analytics pipeline over a synthetic e-commerce dataset, written in Scala on
+      Apache Spark. Every rule that decides something is a pure function you can test without
+      a Spark session — every file read, file write, and print is quarantined in one package.
+    </p>
+    <div class="stats">
+      <div class="stat"><b>15,000</b><span>transactions generated</span></div>
+      <div class="stat"><b>200</b><span>products in the catalog</span></div>
+      <div class="stat"><b>6</b><span>reports written per run</span></div>
+      <div class="stat"><b>0</b><span>exceptions thrown on bad data</span></div>
+    </div>
+    <div class="cta-row">
+      <a class="btn primary" href="https://github.com/danelbaz2/functional-programming">View source on GitHub</a>
+      <a class="btn ghost" href="#run">Jump to setup →</a>
+    </div>
+  </div>
+</section>
+
+<section id="architecture">
+  <div class="wrap">
+    <h2>Architecture</h2>
+    <h3>Pure logic, separated from I/O</h3>
+    <p class="section-lede">
+      Five packages, each with one job. Purity is enforced by convention and checked by the
+      test suite: nothing in <code>core</code> touches a disk, a network, or standard out.
+    </p>
+    <div class="arch-table">
+      <div class="arch-row">
+        <div class="pkg">com.hit.fp.model</div>
+        <span class="tag pure"><span class="dot"></span>pure</span>
+        <div class="desc">Immutable case classes and the <code>OrderSize</code> algebraic data type.</div>
+      </div>
+      <div class="arch-row">
+        <div class="pkg">com.hit.fp.core</div>
+        <span class="tag pure"><span class="dot"></span>pure</span>
+        <div class="desc">Parsing, analytics, data generation, report rendering, the custom combinator.</div>
+      </div>
+      <div class="arch-row">
+        <div class="pkg">com.hit.fp.spark</div>
+        <span class="tag mixed"><span class="dot"></span>pure transforms</span>
+        <div class="desc">How the core functions get distributed across a Spark session.</div>
+      </div>
+      <div class="arch-row">
+        <div class="pkg">com.hit.fp.io</div>
+        <span class="tag effect"><span class="dot"></span>effects</span>
+        <div class="desc">The only code allowed to read a file, write a file, or print.</div>
+      </div>
+      <div class="arch-row">
+        <div class="pkg">com.hit.fp.Main</div>
+        <span class="tag effect"><span class="dot"></span>effects</span>
+        <div class="desc">The impure shell that wires the whole run together.</div>
+      </div>
+    </div>
+    <div class="boundary"><span class="side"></span> pure core, tested without Spark <span class="side"></span></div>
+  </div>
+</section>
+
+<section id="spark">
+  <div class="wrap">
+    <h2>Spark</h2>
+    <h3>Operations used</h3>
+    <p class="section-lede">Both the typed Dataset API and the RDD API show up — <code>Main</code> loads from two CSV files and writes every report back to <code>output/</code>.</p>
+    <div class="table-wrap">
+      <table class="data">
+        <thead><tr><th>Operation</th><th>Where</th></tr></thead>
+        <tbody>
+          <tr><td class="mono">joinWith</td><td>TransactionJobs.enrich — transactions joined with the catalog</td></tr>
+          <tr><td class="mono">map</td><td>TransactionJobs.enrich, TransactionJobs.orderSizeDistribution</td></tr>
+          <tr><td class="mono">filter</td><td>TransactionJobs.keepSignificant, DataSource.readLines</td></tr>
+          <tr><td class="mono">flatMap</td><td>DataSource.loadTransactions, DataSource.loadProducts</td></tr>
+          <tr><td class="mono">groupByKey + mapGroups</td><td>revenueByCategory, spendingByCustomer</td></tr>
+          <tr><td class="mono">reduceByKey (RDD)</td><td>TransactionJobs.revenueByCountry</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+<section id="techniques">
+  <div class="wrap">
+    <h2>Technique</h2>
+    <h3>Advanced functional programming</h3>
+    <div class="grid">
+      <div class="card">
+        <h4>Custom combinator</h4>
+        <p><code>~&gt;</code>, <code>zip</code>, <code>filterK</code>, <code>Transform.chain</code> — composed pipelines as values.</p>
+        <div class="where">core.Transform</div>
+      </div>
+      <div class="card">
+        <h4>Closures over Spark</h4>
+        <p>The significance threshold is captured from <code>PipelineConfig</code> and shipped to every executor.</p>
+        <div class="where">TransactionJobs.keepSignificant</div>
+      </div>
+      <div class="card">
+        <h4>Tail recursion</h4>
+        <p>Revenue totals, Pareto analysis, and both data generators are <code>@tailrec</code>.</p>
+        <div class="where">PureAnalytics, DataGeneration</div>
+      </div>
+      <div class="card">
+        <h4>Pattern matching</h4>
+        <p>Order classification over the sealed <code>OrderSize</code> ADT; number parsing over <code>Try</code>.</p>
+        <div class="where">PureAnalytics, CsvParsing</div>
+      </div>
+      <div class="card">
+        <h4>Functional error handling</h4>
+        <p><code>Either</code> everywhere — a corrupted line never throws, it flows into its own report.</p>
+        <div class="where">core.ParseError, CsvParsing</div>
+      </div>
+      <div class="card">
+        <h4>Currying &amp; higher-order fns</h4>
+        <p><code>atLeastRevenue</code>, <code>shippedTo</code>, <code>topBy</code> — plus a pure RNG that threads state instead of mutating it.</p>
+        <div class="where">PureAnalytics, core.Rng</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="findings" class="tight">
+  <div class="wrap">
+    <h2>Output</h2>
+    <h3>What the run prints</h3>
+    <div class="grid">
+      <div class="card"><h4>Revenue by category</h4><p>Order count and units sold, per category.</p></div>
+      <div class="card"><h4>Revenue by country</h4><p>Computed on the RDD API, by destination.</p></div>
+      <div class="card"><h4>Top 20 customers</h4><p>Ranked by total spend.</p></div>
+      <div class="card"><h4>Order-size distribution</h4><p>SMALL / MEDIUM / LARGE / PREMIUM buckets.</p></div>
+      <div class="card"><h4>Pareto analysis</h4><p>How many categories generate 80% of revenue.</p></div>
+      <div class="card"><h4>Source-file health</h4><p>Accepted vs. rejected lines — roughly 1 in 1,000 is damaged on purpose.</p></div>
+    </div>
+  </div>
+</section>
+
+<section id="run">
+  <div class="wrap">
+    <h2>Setup</h2>
+    <h3>Run it locally</h3>
+    <p class="section-lede">Install these yourself — they're not part of the repository.</p>
+    <div class="grid" style="margin-bottom: 20px;">
+      <div class="card"><h4>JDK 11</h4><p>The project SDK, required by the course.</p></div>
+      <div class="card"><h4>JDK 17+</h4><p>sbt 2.0.6 needs it just to start the build tool; the project still targets JDK 11.</p></div>
+      <div class="card"><h4>IntelliJ IDEA</h4><p>With the Scala plugin installed.</p></div>
+    </div>
+    <div class="terminal">
+      <div class="bar"><span></span><span></span><span></span></div>
+      <pre><span class="comment"># generates the dataset if missing, then runs the pipeline</span>
+<span class="cmd">sbt run</span>
+
+<span class="comment"># runs the ScalaTest suites</span>
+<span class="cmd">sbt test</span></pre>
+    </div>
+    <p class="section-lede" style="margin-bottom:0;">
+      In IntelliJ: open the folder as an sbt project, set the SDK to JDK 11, and run
+      <code>com.hit.fp.Main</code>. Generated input goes to <code>data/</code>, reports go to
+      <code>output/</code> — the fixed seed in <code>PipelineConfig.default</code> makes the
+      dataset identical on every machine.
+    </p>
+    <div class="note">
+      <div>🪟</div>
+      <div>
+        <b>Running on Windows</b>
+        <p>
+          Spark reaches the disk through Hadoop's filesystem layer, which needs a native helper
+          for Windows-style file permissions. Download <code>winutils.exe</code> and
+          <code>hadoop.dll</code> for Hadoop 3.3.x, point <code>HADOOP_HOME</code> at the folder
+          containing them, add it to <code>PATH</code>, then restart IntelliJ. Linux and macOS
+          need none of this.
+        </p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    <p>com.hit.fp — Functional Programming, Final Project</p>
+    <p><a href="https://github.com/danelbaz2/functional-programming">github.com/danelbaz2/functional-programming</a></p>
+  </div>
+</footer>
+
+</body>
+</html>
