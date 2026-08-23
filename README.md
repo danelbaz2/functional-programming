@@ -22,6 +22,30 @@ Generated input goes to `data/`, reports go to `output/`. Deleting `data/`
 regenerates it on the next run; the seed in `PipelineConfig.default` makes the
 generated dataset identical on every machine.
 
+## Setting up on a new machine
+
+Install these yourself, they are not part of the repository:
+
+1. **JDK 11** — the project SDK, as required by the course.
+2. **A JDK 17 or above** — sbt 2.0.6 refuses to start on anything older.
+   It only runs the build tool; the project itself still targets JDK 11.
+3. **IntelliJ IDEA** with the Scala plugin.
+4. **Windows only**: `winutils.exe` and `HADOOP_HOME`, see the section below.
+
+Everything else is downloaded automatically the first time the project is
+imported: sbt itself, the Scala 2.12.19 compiler, Spark 3.3.0 with its whole
+dependency tree, and ScalaTest. Expect a few hundred megabytes and several
+minutes on the first import, then nothing.
+
+In IntelliJ, set the project SDK to the JDK 11 under
+`File -> Project Structure -> Project`, and the sbt JVM to the JDK 17 under
+`Settings -> Build Tools -> sbt -> JVM`.
+
+The dataset is versioned in `data/`, so there is nothing to generate: the
+pipeline reads the very same 15,000 transactions on every machine. Deleting
+`data/` makes the generator rebuild it, identical to the byte thanks to its
+fixed seed.
+
 ## Running on Windows
 
 Spark reaches the local disk through Hadoop's filesystem layer, and Hadoop
