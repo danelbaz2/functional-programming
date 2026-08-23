@@ -1,0 +1,20 @@
+# sbt / build output
+target/
+project/target/
+project/project/
+.bsp/
+
+# IntelliJ
+.idea/
+*.iml
+
+# Generated dataset and reports (rebuilt by running the pipeline)
+data/
+output/
+
+# Local tooling
+.claude/
+
+# OS noise
+Thumbs.db
+.DS_Store
