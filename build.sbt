@@ -57,7 +57,13 @@ scalacOptions ++= Seq(
   "-feature",
   "-unchecked",
   "-encoding",
-  "utf8"
+  "utf8",
+  /* Pin the visible JDK API surface to JDK 11, so the code cannot reference
+   * an API that is missing on the JDK 11 the project targets even when the
+   * build itself runs on a newer JDK. Scala 2.12 emits Java 8 class files
+   * (major version 52) regardless, which any JDK from 8 upwards loads. */
+  "-release",
+  "11"
 )
 
 /** Spark needs its own JVM when the unit tests are executed. */
