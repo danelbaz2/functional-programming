@@ -15,3 +15,4 @@ below, then merge. Entry numbers are stable and are never reused or renumbered.
 
 | # | Date | Severity | Module / File | Symptom | Root cause | Fix | Verification | Commit |
 |---|------|----------|---------------|---------|------------|-----|--------------|--------|
+| 1 | 2026-08-27 | Major | repo / `.gitattributes` | On machines without `core.autocrlf`, every tracked text file shows as modified (LF/CRLF churn), burying real diffs and breaking `git blame` | No `.gitattributes`; line-ending behaviour depended on each contributor's local git configuration | Added `.gitattributes`: `* text=auto`, explicit `eol=lf` for `.scala .sbt .md .properties .csv .html`, `.pdf binary`; ran `git add --renormalize .` (no-op — index was already uniformly LF) | `sbt compile` and `sbt test` identical to baseline: 6 suites, 51 tests, all passed; `data/*.csv` byte-identical, reject count unchanged | `chore(repo): normalise line endings via .gitattributes` |

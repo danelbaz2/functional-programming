@@ -1,0 +1,14 @@
+# Normalise line endings so the repository behaves identically on every machine.
+# Text files are stored with LF in the index; the extensions below are also
+# checked out with LF so diffs and blame stay clean across contributors.
+
+* text=auto
+
+*.scala      text eol=lf
+*.sbt        text eol=lf
+*.md         text eol=lf
+*.properties text eol=lf
+*.csv        text eol=lf
+*.html       text eol=lf
+
+*.pdf binary
