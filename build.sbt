@@ -68,8 +68,8 @@ Test / fork := true
  * off heap memory. Under JDK 11, which this project targets, those internals
  * are still reachable and these options change nothing. They are only needed
  * when the build itself runs on a more recent JDK, where the module system
- * closes them: sbt 2 requires a JDK 17 or above to start, so the forked test
- * JVM inherits that JDK unless it is told otherwise.
+ * closes them: if sbt is started on a JDK 17 or above, the forked test JVM
+ * inherits that JDK unless it is told otherwise.
  */
 val sparkModuleOptions = Seq(
   "--add-opens=java.base/java.lang=ALL-UNNAMED",
