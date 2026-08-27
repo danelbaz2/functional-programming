@@ -34,7 +34,7 @@ import com.hit.fp.model.Transaction
  */
 
 /**
- * Mutable free accumulator used while a group of transactions is folded.
+ * Mutation-free accumulator used while a group of transactions is folded.
  *
  * @param revenue revenue accumulated so far
  * @param orders  number of transaction lines accumulated so far
