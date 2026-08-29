@@ -8,6 +8,10 @@ The pipeline generates a synthetic e-commerce dataset (15,000 transactions and
 disk, joins and aggregates it with Spark,
 and writes six reports plus a printed summary of the findings.
 
+`docs/index.html` is a standalone overview page of the project: open it in a
+browser for a visual summary of the architecture, the Spark operations, the
+functional techniques and the setup.
+
 ## How to run
 
 ```
