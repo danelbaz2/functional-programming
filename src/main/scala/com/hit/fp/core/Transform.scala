@@ -54,6 +54,8 @@ trait Transform[A, B] extends Serializable {
   def ~>[C](next: Transform[B, C]): Transform[A, C] = {
     val self = this
     new Transform[A, C] {
+
+      /** @inheritdoc */
       override def run(input: A): C = next.run(self.run(input))
     }
   }
@@ -70,6 +72,8 @@ trait Transform[A, B] extends Serializable {
   def zip[C](other: Transform[A, C]): Transform[A, (B, C)] = {
     val self = this
     new Transform[A, (B, C)] {
+
+      /** @inheritdoc */
       override def run(input: A): (B, C) = (self.run(input), other.run(input))
     }
   }
@@ -85,6 +89,8 @@ trait Transform[A, B] extends Serializable {
   def filterK(predicate: B => Boolean): Transform[A, Option[B]] = {
     val self = this
     new Transform[A, Option[B]] {
+
+      /** @inheritdoc */
       override def run(input: A): Option[B] = {
         val produced = self.run(input)
         if (predicate(produced)) Some(produced) else None
@@ -108,6 +114,8 @@ object Transform {
    */
   def lift[A, B](function: A => B): Transform[A, B] =
     new Transform[A, B] {
+
+      /** @inheritdoc */
       override def run(input: A): B = function(input)
     }
 
@@ -120,6 +128,8 @@ object Transform {
    */
   def identity[A]: Transform[A, A] =
     new Transform[A, A] {
+
+      /** @inheritdoc */
       override def run(input: A): A = input
     }
 
